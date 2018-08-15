@@ -213,7 +213,7 @@ for (i in 1:n_epochs) {
         epoch_times[i] <- 0.0
     } else {
         epoch_times[i] ~ dnUniform(time_min[i], time_max[i])
-        moves.append( = mvSlide(epoch_times[i], delta=(time_bounds[i][1]-time_bounds[i][2])/2) )
+        moves.append( mvSlide(epoch_times[i], delta=(time_bounds[i][1]-time_bounds[i][2])/2) )
     }
 }
 
