@@ -86,13 +86,13 @@ simple example a fixed tree that we assume is known without uncertainty.
 You may want to look at this tree before by loading the ‘primates.tree‘
 in FigTree or any other tree visualization software.
 
-As usual, we start be initializing some useful helper variables. For
-example, we set up a counter variable for the number of moves that we
-already added to our analysis. This will make it much easier if we
+As usual, we start be initializing some useful helper variables. 
+<!-- For example, we set up a counter variable for the number of moves that we already added to our analysis. This will make it much easier if we
 extend the model or analysis to include additional moves or to remove
-some moves.
+some moves.-->
+For example, we create a vector for the moves.
 
-    mvi = 0 
+    moves = VectorMoves()
 
 Then, we define the overall rate parameter $\sigma$ which we assign a
 (truncated) log-uniform prior. Note that it is more efficient in
@@ -114,8 +114,8 @@ values drawn from a window with width ‘delta‘ and is centered around the
 current values; thus it slides through the parameter space together with
 the current parameter value.
 
-    moves[++mvi] = mvSlide(logAlpha,delta=10,tune=true,weight=2)
-    moves[++mvi] = mvSlide(logSigma, delta=1.0, tune=true, weight=2.0)
+    moves.append( mvSlide(logAlpha,delta=10,tune=true,weight=2) )
+    moves.append( mvSlide(logSigma, delta=1.0, tune=true, weight=2.0) )
 
 In order to create the random variables for the internal states we need
 to know the number of nodes and the number of tips. We will store these
@@ -133,7 +133,7 @@ Again, we’ll specify a sliding move that proposes new values for the
 ‘rootlogmass‘ randomly drawn from a window centered around the current
 value.
 
-    moves[++mvi] = mvSlide(logOptim,delta=10,tune=true,weight=2)
+    moves.append( mvSlide(logOptim,delta=10,tune=true,weight=2) )
 
 Now we are ready to specify the Brownian motion model for each branch.
 That is, we simply specify a new normal distributed random variable for
@@ -159,7 +159,7 @@ standard deviation.
     for (i in (numNodes-1):(numTips+1) ) {
       logmass[i] ~ dnOrnsteinUhlenbeck( x0=logmass, theta=logOptim, alpha=alpha, sigma=sigma, time=psi.branchLength(i) )
       # moves on the Ornstein-Uhlenbeck process
-      moves[++mvi] = mvSlide( logmass[i], delta=10, tune=true ,weight=2) 
+      moves.append( mvSlide( logmass[i], delta=10, tune=true ,weight=2) )
     }
 
 You may have noticed that we specified in the loop a move for each
@@ -232,7 +232,7 @@ branch.
 Next, we specify the prior distribution on the root value.
 
     logRootOptim ~ dnUniform(-10,10)
-    moves[++mvi] = mvSlide(logRootOptim,delta=10,tune=true,weight=2)
+    moves.append( mvSlide(logRootOptim,delta=10,tune=true,weight=2) )
 
 Now, we use a loop over all branches to specify the per branch optimal
 value.
@@ -246,8 +246,8 @@ value.
           nodeOptim[i] := nodeOptim[psi.parent(i)] * optimMultiplier[i]
        }
        optimChange[i] := ifelse( optimMultiplier[i] == 1, 0, 1 )
-       moves[++mvi] = mvRJSwitch(optimMultiplier[i], weight=1)
-       moves[++mvi] = mvScale(optimMultiplier[i], lambda=0.1, tune=true, weight=1)
+       moves.append( mvRJSwitch(optimMultiplier[i], weight=1) )
+       moves.append( mvScale(optimMultiplier[i], lambda=0.1, tune=true, weight=1) )
     }
 
 Only for monitoring purposes we add a variable that counts the current
