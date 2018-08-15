@@ -308,10 +308,10 @@ chromosome losses, and `rho` is the rate of polyploidization.
 
 Add MCMC moves for each of the rates.
 
-    mvi = 1
-    moves[mvi++] = mvScale(gamma, lambda=1, weight=1)
-    moves[mvi++] = mvScale(delta, lambda=1, weight=1)
-    moves[mvi++] = mvScale(rho, lambda=1, weight=1)
+    moves = VectorMoves()
+    moves.append( mvScale(gamma, lambda=1, weight=1) )
+    moves.append( mvScale(delta, lambda=1, weight=1) )
+    moves.append( mvScale(rho, lambda=1, weight=1) )
 
 Now we create the rate matrix for the chromosome evolution model. Here
 we will use a simple ChromEvol model that includes only the rate of
@@ -493,8 +493,8 @@ Beta distribution. The second is Element Swap Simplex move, which
 selects two elements of the `root_frequencies` vector and simply swaps
 their values.
 
-    moves[mvi++] = mvBetaSimplex(root_frequencies, alpha=0.5, weight=10)
-    moves[mvi++] = mvElementSwapSimplex(root_frequencies, weight=10)
+    moves.append( mvBetaSimplex(root_frequencies, alpha=0.5, weight=10) )
+    moves.append( mvElementSwapSimplex(root_frequencies, weight=10) )
 
 You can experiment with different weights for each MCMC move.
 
@@ -633,7 +633,7 @@ We will specify a uniform prior on the tree topology, and add a MCMC
 move on the topology.
 
     topology ~ dnUniformTopology(taxa=taxa, constraints=clade_constraints, rooted=TRUE)
-    moves[mvi++] = mvNNI(topology, weight=10.0)
+    moves.append( mvNNI(topology, weight=10.0) )
 
 Next, we create a stochastic node for each branch length. Each branch
 length prior will have an exponential distribution with rate 1.0. We'll
@@ -641,7 +641,7 @@ also add a simple scaling move for each branch length.
 
     for (i in 1:n_branches) {
         br_lens[i] ~ dnExponential(10.0)
-        moves[mvi++] = mvScale(br_lens[i], lambda=2, weight=1)
+        moves.append( mvScale(br_lens[i], lambda=2, weight=1) )
     }
 
 Finally, build the tree by combining the topology with the branch
@@ -656,13 +656,13 @@ Use a flat Dirichlet prior for the exchange rates.
 
     er_prior <- v(1,1,1,1,1,1)
     er ~ dnDirichlet(er_prior)
-    moves[mvi++] = mvSimplexElementScale(er, alpha=10, weight=3)
+    moves.append( mvSimplexElementScale(er, alpha=10, weight=3) )
 
 And also a flat Dirichlet prior for the stationary base frequencies.
 
     pi_prior <- v(1,1,1,1)
     pi ~ dnDirichlet(pi_prior)
-    moves[mvi++] = mvSimplexElementScale(pi, alpha=10, weight=2)
+    moves.append( mvSimplexElementScale(pi, alpha=10, weight=2) )
 
 Now create a deterministic variable for the nucleotide substitution rate
 matrix.
@@ -800,13 +800,13 @@ change – one for phenotype state 0 and one for phenotype state 1.
 
 Add MCMC moves for each of the rates.
 
-    mvi = 1
-    moves[mvi++] = mvScale(gamma_0, lambda=1, weight=1)
-    moves[mvi++] = mvScale(delta_0, lambda=1, weight=1)
-    moves[mvi++] = mvScale(rho_0, lambda=1, weight=1)
-    moves[mvi++] = mvScale(gamma_1, lambda=1, weight=1)
-    moves[mvi++] = mvScale(delta_1, lambda=1, weight=1)
-    moves[mvi++] = mvScale(rho_1, lambda=1, weight=1)
+    moves = VectorMoves()
+    moves.append( mvScale(gamma_0, lambda=1, weight=1) )
+    moves.append( mvScale(delta_0, lambda=1, weight=1) )
+    moves.append( mvScale(rho_0, lambda=1, weight=1) )
+    moves.append( mvScale(gamma_1, lambda=1, weight=1) )
+    moves.append( mvScale(delta_1, lambda=1, weight=1) )
+    moves.append( mvScale(rho_1, lambda=1, weight=1) )
 
 Now we create the rate matrix for the chromosome evolution model. We
 will set up two rate matrices, one for each phenotype state.
@@ -827,8 +827,8 @@ and 1.
 
     q_01 ~ dnExponential(10.0)
     q_10 ~ dnExponential(10.0)
-    moves[mvi++] = mvScale(q_01, lambda=1, weight=1)
-    moves[mvi++] = mvScale(q_10, lambda=1, weight=1)
+    moves.append( mvScale(q_01, lambda=1, weight=1) )
+    moves.append( mvScale(q_10, lambda=1, weight=1) )
 
 And finally we create the transition rate matrix `Q_b` for the joint
 model of phenotypic and chromosome evolution. First we will initialize
@@ -964,10 +964,10 @@ the two daughter lineages.
 
 We can't forget to add moves for each cladogenetic event:
 
-    moves[mvi++] = mvScale(clado_no_change_pr, lambda=1.0, weight=2)
-    moves[mvi++] = mvScale(clado_fission_pr, lambda=1.0, weight=2)
-    moves[mvi++] = mvScale(clado_fusion_pr, lambda=1.0, weight=2)
-    moves[mvi++] = mvScale(clado_polyploid_pr, lambda=1.0, weight=2)
+    moves.append( mvScale(clado_no_change_pr, lambda=1.0, weight=2) )
+    moves.append( mvScale(clado_fission_pr, lambda=1.0, weight=2) )
+    moves.append( mvScale(clado_fusion_pr, lambda=1.0, weight=2) )
+    moves.append( mvScale(clado_polyploid_pr, lambda=1.0, weight=2) )
 
 Now we can create the cladogenetic CTMC model. We must pass in both the
 `Q` matrix that represents the anagenetic changes, and the `clado_probs`
@@ -1149,10 +1149,10 @@ the rate of demi-polyploidization to 0.0 for simplicity.
 
 Like usual, we must add MCMC moves for the speciation rates.
 
-    moves[mvi++] = mvScale(clado_no_change, lambda=5.0, weight=1)
-    moves[mvi++] = mvScale(clado_fission, lambda=5.0, weight=1)
-    moves[mvi++] = mvScale(clado_fusion, lambda=5.0, weight=1)
-    moves[mvi++] = mvScale(clado_polyploid, lambda=5.0, weight=1)
+    moves.append( mvScale(clado_no_change, lambda=5.0, weight=1) )
+    moves.append( mvScale(clado_fission, lambda=5.0, weight=1) )
+    moves.append( mvScale(clado_fusion, lambda=5.0, weight=1) )
+    moves.append( mvScale(clado_polyploid, lambda=5.0, weight=1) )
 
 We next create a vector to hold the speciation rates, and also create a
 deterministic node `total_speciation` which will be a convenient way to
@@ -1180,7 +1180,7 @@ interval $\{0,1\}$.
 
     rel_extinction ~ dnUniform(0, 1.0)
     rel_extinction(0.4)
-    moves[mvi++] = mvScale(rel_extinction, lambda=5.0, weight=3.0)
+    moves.append( mvScale(rel_extinction, lambda=5.0, weight=3.0) )
 
 We then make a vector of extinction rates for each state. In the basic
 ChromoSSE model we assume all chromosome numbers have the same
