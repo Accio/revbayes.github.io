@@ -12,7 +12,7 @@
 - In our results we see that the extinction rate is fairly constant. Modify the model by using a constant-rate for the extinction rate parameter but still let the speciation rate vary through time.
 	1. Remove all previous occurrences of the extinction rates (*i.e.,* priors, parameters and moves).
 	2. Specify a lognormal prior distribution on the constant extinction rate (`extinction $\sim$ dnLognormal(-5,sd=2*0.587405)`)
-	3. Add a move for the new extinction rate parameter `moves[mvi++] = mvScale(extinction,weight=5.0)`.
+	3. Add a move for the new extinction rate parameter `moves.append( mvScale(extinction,weight=5.0) )`.
 	4. Remove the argument `muTimes=interval_times` from the birth-death process.
 - How does this influence your estimated rates?
 

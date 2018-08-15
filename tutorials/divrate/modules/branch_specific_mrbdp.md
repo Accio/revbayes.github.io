@@ -23,11 +23,11 @@ taxa <- observed_phylogeny.taxa()
 root <- observed_phylogeny.rootAge()
 tree_length <- observed_phylogeny.treeLength()
 ```
-Additionally, we can initialize an iterator variable for our vector of
-moves and monitors:
+<!-- Additionally, we can initialize an iterator variable for our vector of moves and monitors: -->
+Additionally, we can initialize a vector for our moves and monitors:
 ```
-mvi = 1
-mni = 1
+moves    = VectorMoves()
+monitors = VectorMonitors()
 ```
 Finally, we create a helper variable that specifies the number of
 discrete rate categories, another helper variable for the expected
@@ -83,7 +83,7 @@ in the constant-rate birth-death process.
 ```
 speciation_prior_mean <- ln( ln(NUM_TOTAL_SPECIES/2.0) / root )
 speciation_mean ~ dnLognormal(mean=speciation_prior_mean, sd=H)
-moves[mvi++] = mvScale(speciation_mean,lambda=1,tune=true,weight=5)
+moves.append( mvScale(speciation_mean,lambda=1,tune=true,weight=5) )
 ```
 Additionally, we choose a fixed standard deviation of $2*H$
 ($0.587405*2$) for the speciation rates because it represents two orders
@@ -101,7 +101,7 @@ could assume that each rate category has the same extinction rate.
 ```
 extinction_prior_mean <- ln( ln(NUM_TOTAL_SPECIES/2.0) / root )
 extinction_mean ~ dnLognormal(mean=extinction_prior_mean,sd=2*H)
-moves[mvi++] = mvScale(extinction_mean,lambda=1.0,tune=true,weight=3.0)
+moves.append( mvScale(extinction_mean,lambda=1.0,tune=true,weight=3.0) )
 ```
 As with the speciation rate, we discretize the lognormal distribution
 into a finite number of rate categories.
@@ -136,7 +136,7 @@ tree length. As usual for rate parameter, we apply a scaling move to the
 `event_rate` variable.
 ```
 event_rate ~ dnLognormal( ln( EXPECTED_NUM_EVENTS/tree_length ), H)
-moves[mvi++] = mvScale(event_rate,lambda=1,tune=true,weight=5)
+moves.append( mvScale(event_rate,lambda=1,tune=true,weight=5) )
 ```
 Additionally, we need a rate-matrix parameter providing the relative
 rates between paired rate categories. In this case we simply use equal
@@ -201,8 +201,8 @@ because we are not going to look into the samples. However, as good
 practice we still define our two standard monitors: the model monitor
 and a screen monitor
 ```
-monitors[++mni] = mnModel(filename="output/primates_MRBD.log",printgen=10, separator = TAB)
-monitors[++mni] = mnScreen(printgen=10, diversification_mean, turnover)
+monitors.append( mnModel(filename="output/primates_MRBD.log",printgen=10, separator = TAB) )
+monitors.append( mnScreen(printgen=10, diversification_mean, turnover) )
 ```
 
 {% subsubsection Initializing and Running the MCMC Simulation %}
