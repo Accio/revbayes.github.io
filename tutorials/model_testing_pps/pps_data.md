@@ -205,14 +205,14 @@ this will be a familiar to you from the {% page_ref ctmc %}.
 
 First we need to specify some monitors.
 ```
-    mni = 0
-    monitors[++mni] = mnModel(filename="output" + n + "/" + analysis_name + "_posterior.log",printgen=10, separator = TAB)
-    monitors[++mni] = mnFile(filename="output" + n + "/" + analysis_name + "_posterior.trees",printgen=10, separator = TAB, phylogeny)
-    monitors[++mni] = mnScreen(printgen=1000, TL)
-    monitors[++mni] = mnStochasticVariable(filename="output" + n + "/" + analysis_name + "_posterior.var",printgen=10)
+    monitors = VectorMonitors()
+    monitors.append( mnModel(filename="output" + n + "/" + analysis_name + "_posterior.log",printgen=10, separator = TAB) )
+    monitors.append( mnFile(filename="output" + n + "/" + analysis_name + "_posterior.trees",printgen=10, separator = TAB, phylogeny) )
+    monitors.append( mnScreen(printgen=1000, TL) )
+    monitors.append( mnStochasticVariable(filename="output" + n + "/" + analysis_name + "_posterior.var",printgen=10) )
 ```
-Here the monitors are just being advanced by the value of mni which is
-being incremented each generation.
+<!-- Here the monitors are just being advanced by the value of mni which is being incremented each generation. -->
+Here the monitors are just being advanced by the function `monitors.append`.
 
 Next, we will call the MCMC function, passing it the model, monitors and
 moves we specified above to set to build our mymcmc object.

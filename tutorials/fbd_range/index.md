@@ -184,9 +184,12 @@ Since these parameters can be expressed as a deterministic transformation of the
 
 <!-- Before specifying the moves and priors on the model parameters, create a workspace variable called `mvi`. 
 This variable is an iterator that will build a vector containing all of the MCMC moves used to propose new states for every stochastic node in the model graph. 
-Each time a new move is added to the vector, `mvi` will be incremented by a value of 1.
+Each time a new move is added to the vector, `mvi` will be incremented by a value of 1.-->
+Before specifying the moves and priors on the model parameters, create a vector called `moves`. 
+This vector will contain all of the MCMC moves used to propose new states for every stochastic node in the model graph. 
+Each time a new move is added to the vector, the vector length will increase by a value of 1.
 
-    mvi = 1
+    moves = VectorMoves()
     
 Next define a constant node representing the rate hyperparameter of the exponential prior distributions on your diversification parameters.
 
@@ -203,17 +206,17 @@ Then, write a loop that specifys the priors and moves on the rates during each i
 	    div[i] := lambda[i] - mu[i]
 	    turnover[i] := mu[i]/lambda[i]
 
-	    moves[mvi++] = mvScale(mu[i], lambda = 0.01)
-	    moves[mvi++] = mvScale(mu[i], lambda = 0.1)
-	    moves[mvi++] = mvScale(mu[i], lambda = 1)
+	    moves.append( mvScale(mu[i], lambda = 0.01) )
+	    moves.append( mvScale(mu[i], lambda = 0.1) )
+	    moves.append( mvScale(mu[i], lambda = 1) )
 
-	    moves[mvi++] = mvScale(lambda[i], lambda = 0.01)
-	    moves[mvi++] = mvScale(lambda[i], lambda = 0.1)
-	    moves[mvi++] = mvScale(lambda[i], lambda = 1)
+	    moves.append( mvScale(lambda[i], lambda = 0.01) )
+	    moves.append( mvScale(lambda[i], lambda = 0.1) )
+	    moves.append( mvScale(lambda[i], lambda = 1) )
 
-	    moves[mvi++] = mvScale(psi[i], lambda = 0.01)
-	    moves[mvi++] = mvScale(psi[i], lambda = 0.1)
-	    moves[mvi++] = mvScale(psi[i], lambda = 1)
+	    moves.append( mvScale(psi[i], lambda = 0.01) )
+	    moves.append( mvScale(psi[i], lambda = 0.1) )
+	    moves.append( mvScale(psi[i], lambda = 1) )
     }
 
 Note that this loop specifies parameters for an additional interval (`timeline()+1`).
@@ -259,13 +262,13 @@ Add the options for model 1 to your script `mcmc_FBDRMatrix_model1.Rev`.
 
 Next specify scale moves to propose changes to the stratigraphic range start and end times (*i.e.,* $b_i$ and $d_i$).
 
-    moves[mvi++] = mvMatrixElementScale(bd, lambda = 0.01, weight=taxa.size())
-    moves[mvi++] = mvMatrixElementScale(bd, lambda = 0.1, weight=taxa.size())
-    moves[mvi++] = mvMatrixElementScale(bd, lambda = 1, weight=taxa.size())
+    moves.append( mvMatrixElementScale(bd, lambda = 0.01, weight=taxa.size()) )
+    moves.append( mvMatrixElementScale(bd, lambda = 0.1, weight=taxa.size()) )
+    moves.append( mvMatrixElementScale(bd, lambda = 1, weight=taxa.size()) )
 
-    moves[mvi++] = mvMatrixElementSlide(bd, delta = 0.01, weight=taxa.size())
-    moves[mvi++] = mvMatrixElementSlide(bd, delta = 0.1, weight=taxa.size())
-    moves[mvi++] = mvMatrixElementSlide(bd, delta = 1, weight=taxa.size())
+    moves.append( mvMatrixElementSlide(bd, delta = 0.01, weight=taxa.size()) )
+    moves.append( mvMatrixElementSlide(bd, delta = 0.1, weight=taxa.size()) )
+    moves.append( mvMatrixElementSlide(bd, delta = 1, weight=taxa.size()) )
 
 Finally, specify a workspace model variable (`mymodel`) using the `model` function.
 
@@ -277,17 +280,18 @@ The object `mymodel` represents the entire graphical model and allows us to pass
 
 Next you will specify the monitors and output file names. For this, we create a vector called `monitors` that will each sample and record or output our MCMC.
 
-First, create a workspace variable to iterate over the
+<!-- First, create a workspace variable to iterate over the
 `monitors` vector.
 This variable will build a vector containing all of the monitors. 
-Each time a new monitor is added to the vector, `mni` will be incremented by a value of 1.
+Each time a new monitor is added to the vector, `mni` will be incremented by a value of 1. -->
+First, create a vector called `monitors` that will contain all of the monitors. 
     
-    mni = 1
+    monitors = VectorMonitors()
 
 Next, create monitors for the FBDR model parameters speciation, extinction and fossil recovery, along with diversification and turnover.
 
-    monitors[mni++] = mnScreen(lambda, mu, psi, div, turnover, printgen=100)
-    monitors[mni++] = mnModel(filename="model1.log", printgen=10)    
+    moves.append( mnScreen(lambda, mu, psi, div, turnover, printgen=100) )
+    moves.append( mnModel(filename="model1.log", printgen=10) )
 
 The `mnScreen` monitor writes the parameters we specify to the screen every 100 MCMC generations.
 The `mnFile` monitor writes the parameters we specify to file every 10 MCMC generations.     
@@ -295,12 +299,12 @@ The `mnFile` monitor writes the parameters we specify to file every 10 MCMC gene
 We can also add some additional monitors to generate output that can be used with the R package **RevGadets**.
 
     # monitors to print RevGagets input
-    monitors[mni++] = mnFile(filename="output/model1_speciation_rates.log",lambda,printgen=10)
-    monitors[mni++] = mnFile(filename="output/model1_speciation_times.log",timeline,printgen=10)
-    monitors[mni++] = mnFile(filename="output/model1_extinction_rates.log",mu,printgen=10)
-    monitors[mni++] = mnFile(filename="output/model1_extinction_times.log",timeline,printgen=10)
-    monitors[mni++] = mnFile(filename="output/model1_sampling_rates.log",psi,printgen=10)
-    monitors[mni++] = mnFile(filename="output/model1_sampling_times.log",timeline,printgen=10)
+    monitors.append( mnFile(filename="output/model1_speciation_rates.log",lambda,printgen=10) )
+    monitors.append( mnFile(filename="output/model1_speciation_times.log",timeline,printgen=10) )
+    monitors.append( mnFile(filename="output/model1_extinction_rates.log",mu,printgen=10) )
+    monitors.append( mnFile(filename="output/model1_extinction_times.log",timeline,printgen=10) )
+    monitors.append( mnFile(filename="output/model1_sampling_rates.log",psi,printgen=10) )
+    monitors.append( mnFile(filename="output/model1_sampling_times.log",timeline,printgen=10) )
 
 To run the analysis we have to create a workspace variable that defines our MCMC run using the `mcmc` function. This function takes the three main analysis components as arguments and we set the move schedule to `"random"`, meaning moves will be chosen at random during the analysis. 
 
@@ -361,13 +365,13 @@ Instead, we will simply comment out the creation of the `bd` stochastic node and
 ```markdown
 #bd ~ dnFBDRMatrix(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=rho, timeline=timeline, k=k, binary=true)
 
-#moves[mvi++] = mvMatrixElementScale(bd, lambda = 0.01, weight=taxa.size())
-#moves[mvi++] = mvMatrixElementScale(bd, lambda = 0.1, weight=taxa.size())
-#moves[mvi++] = mvMatrixElementScale(bd, lambda = 1, weight=taxa.size())
+#moves.append( mvMatrixElementScale(bd, lambda = 0.01, weight=taxa.size()) )
+#moves.append( mvMatrixElementScale(bd, lambda = 0.1, weight=taxa.size()) )
+#moves.append( mvMatrixElementScale(bd, lambda = 1, weight=taxa.size()) )
 
-#moves[mvi++] = mvMatrixElementSlide(bd, delta = 0.01, weight=taxa.size())
-#moves[mvi++] = mvMatrixElementSlide(bd, delta = 0.1, weight=taxa.size())
-#moves[mvi++] = mvMatrixElementSlide(bd, delta = 1, weight=taxa.size())
+#moves.append( mvMatrixElementSlide(bd, delta = 0.01, weight=taxa.size()) )
+#moves.append( mvMatrixElementSlide(bd, delta = 0.1, weight=taxa.size()) )
+#moves.append( mvMatrixElementSlide(bd, delta = 1, weight=taxa.size()) )
 ```
 
     mymodel = model(alpha)

@@ -443,11 +443,11 @@ among-site-rate-variation is updated not often enough. It is quite
 likely that our move proposed too many bad new parameters. So let us
 change the window size for the scaling move applied on 'alpha' from
 
-    moves[++mvi] = mvScale(alpha, lambda=50.0, weight=2.0)
+    moves.append( mvScale(alpha, lambda=50.0, weight=2.0) )
 
 to
 
-    moves[++mvi] = mvScale(alpha, lambda=1.0, weight=2.0)
+    moves.append( mvScale(alpha, lambda=1.0, weight=2.0) )
 
 This will give us now the following set-up:
 

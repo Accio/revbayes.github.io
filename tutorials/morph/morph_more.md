@@ -633,7 +633,7 @@ mu_morpho ~ dnExponential( 1.0 )
 ```
 Since $\mu$ is a rate parameter, we will apply a scaling move to update it.
 ```
-moves[mvi++] = mvScale(mu_morpho,lambda=1, weight=2.0)
+moves.append( mvScale(mu_morpho,lambda=1, weight=2.0) )
 ```
 
 Lastly, we set up the CTMC. 
@@ -910,12 +910,12 @@ rate_32 ~ dnExponential(rate_pr)
 ```
 As usual, we will apply a scaling move to each of the rate variables.
 ```
-moves[mvi++] = mvScale( rate_12, weight=2 )
-moves[mvi++] = mvScale( rate_13, weight=2 )
-moves[mvi++] = mvScale( rate_21, weight=2 )
-moves[mvi++] = mvScale( rate_23, weight=2 )
-moves[mvi++] = mvScale( rate_31, weight=2 )
-moves[mvi++] = mvScale( rate_32, weight=2 )
+moves.append( mvScale( rate_12, weight=2 ) )
+moves.append( mvScale( rate_13, weight=2 ) )
+moves.append( mvScale( rate_21, weight=2 ) )
+moves.append( mvScale( rate_23, weight=2 ) )
+moves.append( mvScale( rate_31, weight=2 ) )
+moves.append( mvScale( rate_32, weight=2 ) )
 ```
 Next, we put all the rates together into our rate matrix.
 Don't forget to say that we do not rescale the rate matrix (`rescale=false`).
@@ -929,8 +929,8 @@ We will use a Dirichlet prior distribution for the root state frequencies.
 ```
 rf_prior <- [1,1,1]
 rf ~ dnDirichlet( rf_prior )
-moves[mvi++] = mvBetaSimplex( rf, weight=2 )
-moves[mvi++] = mvDirichletSimplex( rf, weight=2 )
+moves.append( mvBetaSimplex( rf, weight=2 ) )
+moves.append( mvDirichletSimplex( rf, weight=2 ) )
 ```
 
 We need to modify the `dnPhyloCTMC` to pass in our new root frequencies parameter.
@@ -1001,30 +1001,27 @@ We also need to specify specific moves that ``jump'' in parameter dimension.
 We will use the `mvRJSwitch` move that changes the value to be either equal to the constant value 
 provided from the `dnRJMixture` or a value drawn from the base distribution (the exponential distribution).
 ```
-moves[mvi++] = mvRJSwitch( rate_12, weight=2 )
-moves[mvi++] = mvRJSwitch( rate_13, weight=2 )
-moves[mvi++] = mvRJSwitch( rate_21, weight=2 )
-moves[mvi++] = mvRJSwitch( rate_23, weight=2 )
-moves[mvi++] = mvRJSwitch( rate_31, weight=2 )
-moves[mvi++] = mvRJSwitch( rate_32, weight=2 )
+moves.append( mvRJSwitch( rate_12, weight=2 ) )
+moves.append( mvRJSwitch( rate_13, weight=2 ) )
+moves.append( mvRJSwitch( rate_21, weight=2 ) )
+moves.append( mvRJSwitch( rate_23, weight=2 ) )
+moves.append( mvRJSwitch( rate_31, weight=2 ) )
+moves.append( mvRJSwitch( rate_32, weight=2 ) )
 ```
 
 Additionally, we also need to specify moves that change the rates if they are not equal to 0.0.
 As usual, we use the standard scaling moves.
 ```
-moves[mvi++] = mvScale( rate_12, weight=2 )
-moves[mvi++] = mvScale( rate_13, weight=2 )
-moves[mvi++] = mvScale( rate_21, weight=2 )
-moves[mvi++] = mvScale( rate_23, weight=2 )
-moves[mvi++] = mvScale( rate_31, weight=2 )
-moves[mvi++] = mvScale( rate_32, weight=2 )
+moves.append( mvScale( rate_12, weight=2 ) )
+moves.append( mvScale( rate_13, weight=2 ) )
+moves.append( mvScale( rate_21, weight=2 ) )
+moves.append( mvScale( rate_23, weight=2 ) )
+moves.append( mvScale( rate_31, weight=2 ) )
+moves.append( mvScale( rate_32, weight=2 ) )
 ```
-
 
 >This is all that you need to do for this ``fancy'' reversible-jump model. Give it a try! 
 {:.instruction}
-
-
 
 {% section Evaluate and Summarize Your Results | sec_ase_results %}
 
