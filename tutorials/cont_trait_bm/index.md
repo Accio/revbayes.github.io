@@ -224,13 +224,13 @@ simple example a fixed tree that we assume is known without uncertainty.
 You may want to look at this tree before by loading the `primates.tree`
 in FigTree or any other tree visualization software.
 
-As usual, we start be initializing some useful helper variables. For
-example, we set up a counter variable for the number of moves that we
-already added to our analysis. This will make it much easier if we
+As usual, we start be initializing some useful helper variables. 
+For example, we create a vector for the MCMC moves.
+<!-- For example, we set up a counter variable for the number of moves that we already added to our analysis. This will make it much easier if we
 extend the model or analysis to include additional moves or to remove
-some moves.
+some moves. -->
 
-    mvi = 0 
+    moves = VectorMoves()
 
 Then, we define the overall rate parameter $\sigma$ which we assign a
 (truncated) log-uniform prior. Note that it is more efficient in
@@ -249,7 +249,7 @@ values drawn from a window with width `delta` and is centered around the
 current values; thus it slides through the parameter space together with
 the current parameter value.
 
-    moves[++mvi] = mvSlide(logSigma, delta=1.0, tune=true, weight=2.0)
+    moves.append( mvSlide(logSigma, delta=1.0, tune=true, weight=2.0) )
 
 Next, define a random variable from the univariate Brownian-Phylo-REML
 process, which we will call `logmass`. We need to provide the tree
@@ -328,7 +328,7 @@ Next, we'll specify a sliding move that proposes new values for the
 `rootlogmass` randomly drawn from a window centered around the current
 value.
 
-    moves[++mvi] = mvSlide(rootlogmass,delta=10,tune=true,weight=2) 
+    moves.append( mvSlide(rootlogmass,delta=10,tune=true,weight=2) )
 
 Finally, we need to substitute the `dnPhyloBrownianREML` by
 `dnPhyloBrownianMVN` to use the phylogenetic covariance matrix approach.
@@ -394,7 +394,7 @@ Again, we'll specify a sliding move that proposes new values for the
 `rootlogmass` randomly drawn from a window centered around the current
 value.
 
-    moves[++mvi] = mvSlide(rootlogmass,delta=10,tune=true,weight=2) 
+    moves.append( mvSlide(rootlogmass,delta=10,tune=true,weight=2) )
 
 In order to create the random variables for the internal states we need
 to know the number of nodes and the number of tips. We will store these
@@ -428,7 +428,7 @@ standard deviation.
     for (i in (numNodes-1):(numTips+1) ) {
       logmass[i] ~ dnNormal( logmass[psi.parent(i)], sd=sigma*sqrt(psi.branchLength(i)) )
       # moves on the Brownian process
-      moves[++mvi] = mvSlide( logmass[i], delta=10, tune=true ,weight=2) 
+      moves.append( mvSlide( logmass[i], delta=10, tune=true ,weight=2) )
     }
 
 You may have noticed that we specified in the loop a move for each
@@ -523,7 +523,7 @@ every character, just as above for the single character example.
 
     for (i in 1:4) {
        rootlogmass[i] ~ dnUniform(-100,100)
-       moves[++mvi] = mvSlide(rootlogmass[i],delta=10,tune=true,weight=2) 
+       moves.append( mvSlide(rootlogmass[i],delta=10,tune=true,weight=2) )
     }
 
 Finally, we bring together all the parameter to specify our Brownian
@@ -550,7 +550,7 @@ Independent site rates
 ----------------------
 
     perSiteRates ~ dnDirichlet([1,1,1,1])
-    moves[++mvi] = mvSimplexElementScale(perSiteRates,alpha=10,tune=true,weight=4)
+    moves.append( mvSimplexElementScale(perSiteRates,alpha=10,tune=true,weight=4) )
 
 Exercises {#exercises-4 .unnumbered}
 ---------
@@ -579,7 +579,7 @@ priors.
 
 Next, we specify a sliding move on the `siteRateDiff`.
 
-    moves[++mvi] = mvSlide(siteRateDiff,delta=10,tune=true,weight=2)
+    moves.append( mvSlide(siteRateDiff,delta=10,tune=true,weight=2) )
 
 To obtain the rates we use `siteRateDiff` as the rate for the ECV
 evolution in females and males and 1-`siteRateDiff` as the rate for the
@@ -723,8 +723,8 @@ rates, *e.g.*, endowed with some diffuse
 exponential prior.
 
     # rescaling moves on speciation and extinction rates
-    moves[++mvi] = mvScale(diversification, lambda=1, tune=true, weight=3.0)
-    moves[++mvi] = mvScale(turnover, lambda=1, tune=true, weight=3.0)
+    moves.append( mvScale(diversification, lambda=1, tune=true, weight=3.0) )
+    moves.append( mvScale(turnover, lambda=1, tune=true, weight=3.0) )
 
 The phylogeny that we used are obviously not a complete sample of all
 the species and you should take the incomplete sampling into account. We
@@ -751,15 +751,15 @@ node ages. The first move randomly picks a subtree and rescales it, and
 the second move randomly pick a node and uniformly proposes a new node
 age between its parent age and oldest child's age.
 
-    moves[++mvi] = mvSubtreeScale(psi, weight=5.0)
-    moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=10.0)
+    moves.append( mvSubtreeScale(psi, weight=5.0) )
+    moves.append( mvNodeTimeSlideUniform(psi, weight=10.0) )
 
 We also need moves on the tree topology to estimate the phylogeny. The
 two moves which you use are the nearest-neighbor interchange (NNI) and
 the fixed-nodeheight-prune-and-regraft (FNPR) {% cite Hohna2012 %}.
 
-    moves[++mvi] = mvNNI(psi, weight=5.0)
-    moves[++mvi] = mvFNPR(psi, weight=5.0)
+    moves.append( mvNNI(psi, weight=5.0) )
+    moves.append( mvFNPR(psi, weight=5.0) )
 
 We are essentially done now. We only need to add a new monitor for the
 tree so that we can monitor and build the maximum a posteriori tree
@@ -835,8 +835,8 @@ We can use a flat Dirichlet prior density on the exchangeability rates
 Now add the simplex scale move one each the exchangeability rates `er`
 and the stationary frequencies `pi` to the moves vector:
 
-    moves[++mvi] = mvSimplexElementScale(er) 
-    moves[++mvi] = mvSimplexElementScale(pi)  
+    moves.append( mvSimplexElementScale(er) )
+    moves.append( mvSimplexElementScale(pi) ) 
 
 We can finish setting up this part of the model by creating a
 deterministic node for the GTR instantaneous-rate matrix `Q`. The
@@ -865,7 +865,7 @@ Initialize the `gamma_rates` deterministic node vector using the
 The random variable that controls the rate variation is the stochastic
 node `alpha`. We will apply a simple scale move to this parameter.
 
-    moves[++mvi] = mvScale(alpha, weight=2.0)
+    moves.append( mvScale(alpha, weight=2.0) )
 
 This finishes the substitution process part of the model.
 
@@ -879,7 +879,7 @@ invariant.
 
 We will apply a sliding window move to the `logClockRate`.
 
-    moves[++mvi] = mvSlide(logClockRate, delta=0.1, tune=true, weight=2.0)
+    moves.append( mvSlide(logClockRate, delta=0.1, tune=true, weight=2.0) )
 
 Remember that you need to call the `PhyloCTMC` constructor to include
 the new site-rate parameter:
