@@ -287,14 +287,15 @@ the taxon names. This list will be used to initialize the tree.
     num_taxa <- morpho.size() 
     num_branches <- 2 * num_taxa - 2
 ```
-Next, create two workspace variables called `mvi` and `mni`. These variable are 
+<!--Next, create two workspace variables called `mvi` and `mni`. These variable are 
 iterators that will build a vector containing all of the MCMC moves used
 to propose new states for every stochastic node in the model graph. Each
 time a new move is added to the vector, `mvi` will be incremented by a
-value of `1`.
+value of `1`.-->
+Next, create two vectors called `moves` and `monitors`. These vectors will  contain all of the MCMC moves used to propose new states for every stochastic node in the model graph. Each time a new move is added to the vector, the length of the vector will be incremented by a value of `1`.
 ```
-    mvi = 1
-    mni = 1
+    moves    = VectorMoves()
+    monitors = VectorMonitors()
 ```
 One important distinction here is that `mvi` is part of the RevBayes
 workspace and not the hierarchical model. Thus, we use the workspace
@@ -307,12 +308,12 @@ First, we will create a joint prior on the branch lengths and tree topology.
 This should be familiar from the {% page_ref ctmc %}
 ```
     br_len_lambda ~ dnExp(0.2)
-    moves[mvi++] = mvScale(br_len_lambda, weight=2)
+    moves.append( mvScale(br_len_lambda, weight=2) )
 
     phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(br_len_lambda))
-    moves[mvi++] = mvNNI(phylogeny, weight=n_branches/2.0)
-    moves[mvi++] = mvSPR(phylogeny, weight=n_branches/10.0)
-    moves[mvi++] = mvBranchLengthScale(phylogeny, weight=n_branches)
+    moves.append( mvNNI(phylogeny, weight=n_branches/2.0) )
+    moves.append( mvSPR(phylogeny, weight=n_branches/10.0) )
+    moves.append( mvBranchLengthScale(phylogeny, weight=n_branches) )
     
     tree_length := phylogeny.treeLength()
 ```
@@ -331,7 +332,7 @@ the Gamma distribution.
     rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
 
     #Moves on the parameters to the Gamma distribution.
-    moves[mvi++] = mvScale(alpha_morpho, lambda=1, weight=2.0)
+    moves.append( mvScale(alpha_morpho, lambda=1, weight=2.0) )
 ```
 
 Lastly, we set up the CTMC. This should also be familiar from the {% page_ref ctmc %}. 
@@ -378,7 +379,7 @@ accessory programs for evaluating such parameters. We will also name the
 output file for this monitor and indicate that we wish to sample our
 MCMC every 10 cycles.
 ```
-    monitors[mni++] = mnModel(filename="output/mk.log", printgen=10)
+    monitors.append( mnModel(filename="output/mk.log", printgen=10) )
 ```
 The `mnFile` monitor writes any parameter we specify to file. Thus, if
 we only cared about the branch lengths and nothing else (this is not a
@@ -389,13 +390,13 @@ topology is not included in the `mnModel` monitor (because it is not
 numerical), we will use `mnFile` to write the tree to file by specifying
 our `phylogeny` variable in the arguments.
 ```
-    monitors[mni++] = mnFile(filename="output/mk.trees", printgen=10, phylogeny)
+    monitors.append( mnFile(filename="output/mk.trees", printgen=10, phylogeny) )
 ```
 The third monitor we will add to our analysis will print information to
 the screen. Like with `mnFile` we must tell `mnScreen` which parameters
 we'd like to see updated on the screen.
 ```
-    monitors[mni++] = mnScreen(printgen=100)
+    monitors.append( mnScreen(printgen=100) )
 ```
 
 
@@ -572,7 +573,7 @@ for the Beta distribution: `beta_scale` so that $\alpha = \beta$.
 ```
     num_cats = 4
     beta_scale ~ dnLognormal( 0.0, sd=2*0.587405 )
-    moves[mvi++] = mvScale(beta_scale, lambda=1, weight=5.0 )
+    moves.append( mvScale(beta_scale, lambda=1, weight=5.0 ) )
 ```
 Above, we initialized the number of categories, the parameters to the
 Beta distribution, and the moves on the parameters to the Beta.

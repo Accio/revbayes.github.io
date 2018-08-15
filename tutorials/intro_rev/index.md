@@ -636,9 +636,9 @@ new values and know how to reset the values if the proposals are
 rejected. We use the same sliding window move as we implemented above by
 ourselves.
 
-    mi <- 0
-    moves[mi++] = mvSlide(alpha)
-    moves[mi++] = mvSlide(beta)
+    moves = VectorMoves()
+    moves.append( mvSlide(alpha) )
+    moves.append( mvSlide(beta) )
 
 Then we set up the model. This means we create a stochastic variable for
 each observation and clamp its value with the observed data.
@@ -766,11 +766,11 @@ Then we select moves for each parameter. For the rate parameters — which
 are defined only on the positive real line — we choose a scaling move.
 Only for ‘theta‘ we choose the sliding window proposal.
 
-    mi <- 0
-    moves[mi++] = mvScale(eta)
-    moves[mi++] = mvScale(beta)
-    moves[mi++] = mvScale(gamma)
-    moves[mi++] = mvSlide(theta)
+    moves = VectorMoves()
+    moves.append( mvScale(eta) )
+    moves.append( mvScale(beta) )
+    moves.append( mvScale(gamma) )
+    moves.append( mvSlide(theta) )
 
 Then, we set up the model by computing the conditional rate of the
 Poisson distribution, creating random variables for each observation and

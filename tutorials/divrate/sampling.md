@@ -427,9 +427,9 @@ in `Rev`.
     # Get some useful variables from the data. We need these later on.
     taxa <- T.taxa()
 
-    # set my move index
-    mvi = 0
-    mni = 0
+    # create move and monitor vectors
+    moves    = VectorMoves()
+    monitors = VectorMonitors()
 
     NUM_INTERVALS = 10
 
@@ -442,10 +442,10 @@ in `Rev`.
     # first we create the standard deviation of the rates between intervals
     # draw the sd from an exponential distribution
     speciation_sd ~ dnExponential(1.0)
-    moves[++mvi] = mvScale(speciation_sd,weight=5.0)
+    moves.append( mvScale(speciation_sd,weight=5.0) )
 
     extinction_sd ~ dnExponential(1.0)
-    moves[++mvi] = mvScale(extinction_sd,weight=5.0)
+    moves.append( mvScale(extinction_sd,weight=5.0) )
 
 
     # create a random variable at the present time
@@ -454,8 +454,8 @@ in `Rev`.
 
 
     # apply moves on the rates
-    moves[++mvi] = mvSlide(log_speciation[1], weight=2)
-    moves[++mvi] = mvSlide(log_extinction[1], weight=2)
+    moves.append( mvSlide(log_speciation[1], weight=2) )
+    moves.append( mvSlide(log_extinction[1], weight=2) )
 
 
     speciation[1] := exp( log_speciation[1] )
@@ -470,8 +470,8 @@ in `Rev`.
         log_extinction[index] ~ dnNormal( mean=log_extinction[i], sd=extinction_sd )
 
         # apply moves on the rates
-        moves[++mvi] = mvSlide(log_speciation[index], weight=2)
-        moves[++mvi] = mvSlide(log_extinction[index], weight=2)
+        moves.append( mvSlide(log_speciation[index], weight=2) )
+        moves.append( mvSlide(log_extinction[index], weight=2) )
 
         # transform the log-rate into actual rates
         speciation[index] := exp( log_speciation[index] )
@@ -479,11 +479,11 @@ in `Rev`.
 
     }
 
-    moves[++mvi] = mvVectorSlide(log_speciation, weight=10)
-    moves[++mvi] = mvVectorSlide(log_extinction, weight=10)
+    moves.append( mvVectorSlide(log_speciation, weight=10) )
+    moves.append( mvVectorSlide(log_extinction, weight=10) )
 
-    moves[++mvi] = mvShrinkExpand( log_speciation, sd=speciation_sd, weight=10 )
-    moves[++mvi] = mvShrinkExpand( log_extinction, sd=extinction_sd, weight=10 )
+    moves.append( mvShrinkExpand( log_speciation, sd=speciation_sd, weight=10 ) )
+    moves.append( mvShrinkExpand( log_extinction, sd=extinction_sd, weight=10 ) )
 
 
     interval_times <- T.rootAge() * (1:NUM_INTERVALS) / (NUM_INTERVALS) * 0.8
@@ -510,12 +510,12 @@ in `Rev`.
     mymodel = model(timetree)
 
     ### set up the monitors that will output parameter values to file and screen 
-    monitors[++mni] = mnModel(filename="output/primates_uniform.log",printgen=10, separator = TAB)
-    monitors[++mni] = mnFile(filename="output/primates_uniform_speciation_rates.log",printgen=10, separator = TAB, speciation)
-    monitors[++mni] = mnFile(filename="output/primates_uniform_speciation_times.log",printgen=10, separator = TAB, interval_times)#
-    monitors[++mni] = mnFile(filename="output/primates_uniform_extinction_rates.log",printgen=10, separator = TAB, extinction)
-    monitors[++mni] = mnFile(filename="output/primates_uniform_extinction_times.log",printgen=10, separator = TAB, interval_times)
-    monitors[++mni] = mnScreen(printgen=1000, extinction_sd, speciation_sd)
+    monitors.append( mnModel(filename="output/primates_uniform.log",printgen=10, separator = TAB) )
+    monitors.append( mnFile(filename="output/primates_uniform_speciation_rates.log",printgen=10, separator = TAB, speciation) )
+    monitors.append( mnFile(filename="output/primates_uniform_speciation_times.log",printgen=10, separator = TAB, interval_times) )
+    monitors.append( mnFile(filename="output/primates_uniform_extinction_rates.log",printgen=10, separator = TAB, extinction) )
+    monitors.append( mnFile(filename="output/primates_uniform_extinction_times.log",printgen=10, separator = TAB, interval_times) )
+    monitors.append( mnScreen(printgen=1000, extinction_sd, speciation_sd) )
 
 
 
