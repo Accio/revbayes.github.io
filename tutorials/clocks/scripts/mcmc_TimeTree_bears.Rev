@@ -6,8 +6,8 @@
 ### Load the sequence alignment
 D <- readDiscreteCharacterData(file="data/bears_irbp.nex")
 
-### initialize an iterator for the moves vector
-mi = 1
+### initialize the moves vector
+moves = VectorMoves()
 
 n_sites <- D.nchar()
 

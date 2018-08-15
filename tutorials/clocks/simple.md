@@ -192,9 +192,9 @@ This list will
     taxa <- T.taxa()
  -->
 
-Next we need a helper variable to keep track of the index in our list of moves:
+Next we need to create a vector for the moves:
 
-    mvi = 1
+    moves = VectorMoves()
 
 #### The speciation rate
 
@@ -219,13 +219,14 @@ The degree of change from that multiplier is determined by the value of the tuni
 The move functions also require us to decide how often changes are proposed to this parameter.
 This is done by setting the `weight` of the move. 
 
-    moves[mvi++] = mvScale(speciation, lambda=1.0, tune=true, weight=3.0)
+    moves.append( mvScale(speciation, lambda=1.0, tune=true, weight=3.0) )
 
-All of our moves are contained in a single vector we are calling `moves`. 
-In the `Rev` code above, we put our first move in the first position of the vector. 
+All of our moves are contained in a single vector we are calling `moves`.
+New moves can be added to the vector using the function `moves.append`. 
+<!-- In the `Rev` code above, we put our first move in the first position of the vector. 
 The `++` notation indicates that we are incrementing the index variable `mvi` by `1`. 
 By using `mvi++` we are using post-incrementation. This means that the variable is increased 
-_after_ it is used. 
+_after_ it is used. -->
 
 #### The probability of sampling an extant species
 
@@ -382,7 +383,7 @@ won't have any variables left over from the previous section.
 We will initialize the analysis just like we did above.
 
     T <- readTrees("data/bears_dosReis.tre")[1]
-    mvi = 1
+    moves = VectorMoves()
 
 #### The speciation rate
 
@@ -390,7 +391,7 @@ For this model, let's assume that the speciation rate has a smaller mean value.
 
     sp_mean <- 0.2
     speciation ~ dnExp(1.0 / sp_mean)
-    moves[mvi++] = mvScale(speciation, lambda=1.0, tune=true, weight=3.0)
+    moves.append( mvScale(speciation, lambda=1.0, tune=true, weight=3.0) )
 
 #### The extinction rate
 
@@ -400,7 +401,7 @@ distribution.
 
     ext_mean <- 0.01
     extinction ~ dnExp(1.0 / ext_mean)
-    moves[mvi++] = mvScale(extinction, lambda=1.0, tune=true, weight=3.0)
+    moves.append( mvScale(extinction, lambda=1.0, tune=true, weight=3.0) )
 
 #### Diversification and turnover
 
@@ -529,10 +530,9 @@ We will use the `readDiscreteCharacterData()` function and assign the sequence a
 
     data <- readDiscreteCharacterData(file="data/bears_irbp.nex")
 
-Create the index to augment the `moves` vector.
+Create the `moves` vector.
 
-    mvi = 1
-
+    moves = VectorMoves()
 
 {% subsection The Tree Model | treemodel %}
 
@@ -542,11 +542,11 @@ we can use the same model specification as in the {% ref bdsec %} section.
     # Speciation rate
     sp_mean <- 0.02
     speciation ~ dnExp(1.0 / sp_mean)
-    moves[mvi++] = mvScale(speciation, lambda=1.0, tune=true, weight=3.0)
+    moves.append( mvScale(speciation, lambda=1.0, tune=true, weight=3.0) )
     # Extinction rate
     ext_mean <- 0.01
     extinction ~ dnExp(1.0 / ext_mean)
-    moves[mvi++] = mvScale(extinction, lambda=1.0, tune=true, weight=3.0)
+    moves.append( mvScale(extinction, lambda=1.0, tune=true, weight=3.0) )
     # Deterministic nodes
     diversification := speciation - extinction
     turnover := extinction / speciation
@@ -600,16 +600,16 @@ Thus, we will have to apply MCMC moves to the tree parameter so that we can samp
 
 First, we can apply all the moves that propose changes to the node ages:
 
-    moves[mvi++] = mvNodeTimeSlideUniform(timetree, weight=30.0)
-    moves[mvi++] = mvTreeScale(tree=timetree, rootAge=root_time, delta=1.0, tune=true, weight=3.0)
-    moves[mvi++] = mvSlide(root_time, delta=2.0, tune=true, weight=10.0)
-    moves[mvi++] = mvScale(root_time, lambda=2.0, tune=true, weight=10.0)
+    moves.append( mvNodeTimeSlideUniform(timetree, weight=30.0) )
+    moves.append( mvTreeScale(tree=timetree, rootAge=root_time, delta=1.0, tune=true, weight=3.0) )
+    moves.append( mvSlide(root_time, delta=2.0, tune=true, weight=10.0) )
+    moves.append( mvScale(root_time, lambda=2.0, tune=true, weight=10.0) )
 
 Then, we can add moves that alter the tree topology:
 
-    moves[mvi++] = mvNNI(timetree, weight=8.0)
-    moves[mvi++] = mvNarrow(timetree, weight=8.0)
-    moves[mvi++] = mvFNPR(timetree, weight=8.0)
+    moves.append( mvNNI(timetree, weight=8.0) )
+    moves.append( mvNarrow(timetree, weight=8.0) )
+    moves.append( mvFNPR(timetree, weight=8.0) )
 
 
 {% subsection The Relaxed Clock Model | clockmodel %}
@@ -625,7 +625,7 @@ this parameter will be called `branch_rates_mean`. Since it will be a stochastic
 we will also propose changes to it during our MCMC.
 
     branch_rates_mean ~ dnExponential(10.0)
-    moves[mvi++] = mvScale(branch_rates_mean, lambda=1.0, tune=true, weight=2.0)
+    moves.append( mvScale(branch_rates_mean, lambda=1.0, tune=true, weight=2.0) )
 
 Now that we have a hyperprior defining the mean of the prior on the branch rates, we can 
 instantiate the stochastic nodes for each of the branches. To do this, we can use a `for` loop.
@@ -641,14 +641,14 @@ scale move to our `moves` list.
 
     for(i in 1:n_branches){
         branch_rates[i] ~ dnExp(1/branch_rates_mean)
-        moves[mvi++] = mvScale(branch_rates[i], lambda=1.0, tune=true, weight=2.0)
+        moves.append( mvScale(branch_rates[i], lambda=1.0, tune=true, weight=2.0) )
     }
 
 The variable `branch_rates` is now a vector of stochastic nodes. We can add an additional
 move that will operate on the whole vector by scaling it up or down. Adding multiple moves
 to parameters can help with mixing.
 
-    moves[mvi++] = mvVectorScale(branch_rates, lambda=1.0, tune=true, weight=4.0)
+    moves.append( mvVectorScale(branch_rates, lambda=1.0, tune=true, weight=4.0) )
 
 
 {% subsection The Substitution Model | gtrmodelsec %}
@@ -665,14 +665,14 @@ We also need to add a move that will proposed changes to the `sf` simplex.
 
     sf_hp <- v(1,1,1,1)
     sf ~ dnDirichlet(sf_hp)
-    moves[mvi++] = mvSimplexElementScale(sf, alpha=10.0, tune=true, weight=3.0)
+    moves.append( mvSimplexElementScale(sf, alpha=10.0, tune=true, weight=3.0) )
 
 The exchangeability rates are parameterized in a similar way as the stationary frequencies, 
 except here there are 6 elements instead of 4.
 
     er_hp <- v(1,1,1,1,1,1)
     er ~ dnDirichlet(er_hp)
-    moves[mvi++] = mvSimplexElementScale(er, alpha=10.0, tune=true, weight=3.0)
+    moves.append( mvSimplexElementScale(er, alpha=10.0, tune=true, weight=3.0) )
 
 With the parameters of our substitution models defined, we can create a _deterministic_ node 
 for the instantaneous rate matrix, *i.e.*, the `Q` matrix. In RevBayes, there are functions
