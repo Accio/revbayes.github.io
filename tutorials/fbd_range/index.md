@@ -182,7 +182,7 @@ The tuning value determines the size of the proposed change and using multiple m
 It may also be useful to keep track of the diversification ($\lambda - \mu$) and turnover ($\mu/\lambda$) parameters. 
 Since these parameters can be expressed as a deterministic transformation of the speciation and extinction rates, we can also monitor these values (that is, keep track of them during MCMC, and print them to a file) by creating deterministic nodes for these parameters for each interval using the `:=` operator.
 
-Before specifying the moves and priors on the model parameters, create a workspace variable called `mvi`. 
+<!-- Before specifying the moves and priors on the model parameters, create a workspace variable called `mvi`. 
 This variable is an iterator that will build a vector containing all of the MCMC moves used to propose new states for every stochastic node in the model graph. 
 Each time a new move is added to the vector, `mvi` will be incremented by a value of 1.
 
