@@ -9,11 +9,11 @@
 source( model_file_name )
 
 ## first we set a counter for our monitors
-mni = 0
+monitors = VectorMonitors()
 
 ## next we setup our monitors, like in our previous MCMC analyses
-monitors[++mni] = mnModel(filename="output_" + model_name + "/" + analysis_name + "_posterior.log",printgen=100, separator = TAB)
-monitors[++mni] = mnFile(filename="output_" + model_name + "/" + analysis_name + "_posterior.trees",printgen=100, separator = TAB, phylogeny)
+monitors.append(mnModel(filename="output_" + model_name + "/" + analysis_name + "_posterior.log",printgen=100, separator = TAB))
+monitors.append(mnFile(filename="output_" + model_name + "/" + analysis_name + "_posterior.trees",printgen=100, separator = TAB, phylogeny))
 
 ## now we setup our MCMC object for each posterior predictive dataset
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1)

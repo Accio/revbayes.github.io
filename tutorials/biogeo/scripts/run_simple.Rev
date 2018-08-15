@@ -67,7 +67,7 @@ tree <- readTrees(tree_fn)[1]
 
 log10_rate_bg ~ dnUniform(-4,2)
 log10_rate_bg.setValue(-2)
-moves[mvi++] = mvSlide(log10_rate_bg, weight=4)
+moves.append(mvSlide(log10_rate_bg, weight=4))
 
 # Then, convert the rate from log-scale to linear-scale with a deterministic node, and assign moves.
 # This yields a uniform prior over orders of magnitude, ranging from 10exp(−4) to 10exp(2) events per million years.
@@ -125,7 +125,7 @@ clado_event_probs <- simplex(1,1)
 # p_sympatry ~ dnUniform(0,1)
 # p_allopatry := abs(1.0 - p_sympatry)
 # clado_type_probs := simplex(p_sympatry, p_allopatry)
-# moves[mvi++] = mvSlide(p_sympatry, weight=2)
+# moves.append(mvSlide(p_sympatry, weight=2))
 
 #clado_event_probs ~ dnDirichlet(v(1,1))
 
