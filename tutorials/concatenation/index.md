@@ -172,8 +172,8 @@ Scripts are all placed in
         taxa <- data[1].taxa()
         n_branches <- 2 * n_species - 1 # number of branches in a rooted tree
 
-        # We set our move index
-        mi = 0
+        # We create our vector
+        moves = VectorMoves()
 
 3.  We specified a constant-rate birth-death process as our prior on the
     species tree. The birth-death process has a speciation and
@@ -200,22 +200,22 @@ Scripts are all placed in
 
         # create some moves that change the stochastic variables
         # Moves are sliding and scaling proposals
-        moves[++mvi] = mvSlide(diversification,delta=1,tune=true,weight=2)
-        moves[++mvi] = mvSlide(relativeExtinction,delta=1,tune=true,weight=2)
-        moves[++mvi] = mvScale(diversification,lambda=1,tune=true,weight=2)
-        moves[++mvi] = mvScale(relativeExtinction,lambda=1,tune=true,weight=2)
-        moves[++mvi] = mvSlide(root,delta=1,tune=true,weight=0.2)
+        moves.append( mvSlide(diversification,delta=1,tune=true,weight=2) )
+        moves.append( mvSlide(relativeExtinction,delta=1,tune=true,weight=2) )
+        moves.append( mvScale(diversification,lambda=1,tune=true,weight=2) )
+        moves.append( mvScale(relativeExtinction,lambda=1,tune=true,weight=2) )
+        moves.append( mvSlide(root,delta=1,tune=true,weight=0.2) )
 
 
         # construct a variable for the tree drawn from a birth-death process
         psi ~ dnBDP(lambda=speciation, mu=extinction, rootAge=root, rho=sampling_fraction, taxa=taxa )
 
-        moves[++mvi] = mvNarrow(psi, weight=5.0)
-        moves[++mvi] = mvNNI(psi, weight=1.0)
-        moves[++mvi] = mvFNPR(psi, weight=3.0)
-        moves[++mvi] = mvGPR(psi, weight=3.0)
-        moves[++mvi] = mvSubtreeScale(psi, weight=3.0)
-        moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+        moves.append( mvNarrow(psi, weight=5.0) )
+        moves.append( mvNNI(psi, weight=1.0) )
+        moves.append( mvFNPR(psi, weight=3.0) )
+        moves.append( mvGPR(psi, weight=3.0) )
+        moves.append( mvSubtreeScale(psi, weight=3.0) )
+        moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
 
 4.  Now that we have a species tree, which we assume is shared exactly
     for all genes. That is, we assume each gene evolves under exactly
@@ -234,7 +234,7 @@ Scripts are all placed in
            log_clock_rate[i] ~ dnUniform(-8,4)
            clock_rate[i] := 10^log_clock_rate[i]
            
-           moves[++mvi] = mvSlide(log_clock_rate[i], weight=1.0)
+           moves.append( mvSlide(log_clock_rate[i], weight=1.0) )
         }
 
 5.  Next we need our model for the substitution process. Hence, we just
@@ -247,12 +247,11 @@ Scripts are all placed in
 
             #### specify the HKY substitution model applied uniformly to all sites of a gene
             kappa[i] ~ dnLognormal(0,1)
-            moves[++mvi] = mvScale(kappa[i],weight=1)
+            moves.append( mvScale(kappa[i],weight=1) )
 
             pi_prior[i] <- v(1,1,1,1) 
             pi[i] ~ dnDirichlet(pi_prior[i])
-            moves[++mvi] = mvSimplexElementScale(pi[i],weight=2)
-
+            moves.append( mvSimplexElementScale(pi[i],weight=2) )
 
             #### create a deterministic variable for the rate matrix
             Q[i] := fnHKY(kappa[i],pi[i]) 
@@ -263,7 +262,7 @@ Scripts are all placed in
             gamma_rates[i] := fnDiscretizeGamma( alpha[i], alpha[i], 4, false )
 
             # add moves for the stationary frequencies, exchangeability rates and the shape parameter
-            moves[++mvi] = mvScale(alpha[i],weight=2)
+            moves.append( mvScale(alpha[i],weight=2) )
 
         }
 
