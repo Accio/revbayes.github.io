@@ -5,10 +5,9 @@
 # First, assign the tree and geographic range files (these are contained in your folder "data"; notice that you need to be one level above).
 # Create a directory for the output file
 
-
 # Filenames
-range_fn = "data/silversword.n4.range.nex"
-tree_fn  = "data/silversword.tre"
+range_fn = "data/n4/silversword.n4.range.nex"
+tree_fn  = "data/n4/silversword.tre"
 out_fn   = "output/simple"
 
 # Read binary (01) presence-absence range data contained in "range_fn"
@@ -26,7 +25,6 @@ dat_range_01[1]
 
 # And as machine-readable natural numbers:  3
 dat_range_n[1]
-
 
 # We record the correspondence between range states and range labels.
 # Store the vector of range state descriptions
@@ -49,7 +47,6 @@ write(state_desc_str, file=out_fn+".state_labels.txt")
 # Read the tree. If there are more than one tree, we keep an index.
 tree <- readTrees(tree_fn)[1]
 
-
 #######################
 # Biogeography model #
 #######################
@@ -63,17 +60,19 @@ tree <- readTrees(tree_fn)[1]
 # we introduce a biogeographic rate parameter, similar to the molecular clock parameter used in dating analyses.
 
 # In the tutorial example, this is set to be quite broad or uninformative. "log10_range_bg" is set as a uniform distribution bounded 
+
 # between 0.0001 (10exp(-4)) and 100 (10exp(2)), with an initial value of 0.01 (10exp(-2)).
 
 log10_rate_bg ~ dnUniform(-4,2)
 log10_rate_bg.setValue(-2)
-moves[mvi++] = mvSlide(log10_rate_bg, weight=4)
+
+moves = VectorMoves()
+moves.append(mvSlide(log10_rate_bg, weight=4))
 
 # Then, convert the rate from log-scale to linear-scale with a deterministic node, and assign moves.
 # This yields a uniform prior over orders of magnitude, ranging from 10exp(−4) to 10exp(2) events per million years.
 
 rate_bg := 10^log10_rate_bg
-
 
 # Because the rate matrix will describe the relative anagenetic event rates, 
 # we can safely assume that dispersal occurs at the relative (fixed) rate of one.
@@ -91,7 +90,7 @@ for (i in 1:n_areas) {
 log_sd <- 0.5
 log_mean <- ln(1) - 0.5*log_sd^2
 extirpation_rate ~ dnLognormal(mean=log_mean, sd=log_sd)
-moves[2] = mvScale(extirpation_rate, weight=2)
+moves.append(mvScale(extirpation_rate, weight=2))
 
 # Build the relative extirpation rate matrix. Notice that er is a diagonal matrix where all elements except the diagonal are 0.0.
 # The diagonal elements are "determined" by the extirpation_rate random variable.
@@ -125,10 +124,9 @@ clado_event_probs <- simplex(1,1)
 # p_sympatry ~ dnUniform(0,1)
 # p_allopatry := abs(1.0 - p_sympatry)
 # clado_type_probs := simplex(p_sympatry, p_allopatry)
-# moves[mvi++] = mvSlide(p_sympatry, weight=2)
+# moves.append(mvSlide(p_sympatry, weight=2))
 
 #clado_event_probs ~ dnDirichlet(v(1,1))
-
 
 # The matrix of cladogenetic transition probabilities
 P_DEC := fnDECCladoProbs(eventProbs=clado_event_probs,
@@ -152,16 +150,17 @@ m_bg.clamp(dat_range_n)
 # Monitors #
 ############
 
-monitors[1] = mnScreen(rate_bg, extirpation_rate, printgen=10)
-monitors[2] = mnModel(file=out_fn+".params.log", printgen=10)
-monitors[3] = mnFile(tree, file=out_fn+".tre", printgen=10)
-monitors[4] = mnJointConditionalAncestralState(tree=tree,
+monitors = VectorMonitors()
+monitors.append(mnScreen(rate_bg, extirpation_rate, printgen=10))
+monitors.append(mnModel(file=out_fn+".params.log", printgen=10))
+monitors.append(mnFile(tree, file=out_fn+".tre", printgen=10))
+monitors.append(mnJointConditionalAncestralState(tree=tree,
                                                     ctmc=m_bg,
                                                     filename=out_fn+".states.log",
                                                     type="NaturalNumbers",
                                                     printgen=10,
                                                     withTips=true,
-                                                    withStartStates=true)
+                                                    withStartStates=true))
 
 ############
 # Analysis #
