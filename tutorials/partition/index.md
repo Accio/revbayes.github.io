@@ -178,11 +178,12 @@ number of taxa and branches.
     num_branches <- 2 * num_species - 3
     taxa <- data.taxa()
 ```
-Additionally, we will create some move and monitor index variables to
-create our move and monitor vectors.
+<!-- Additionally, we will create some move and monitor index variables to
+create our move and monitor vectors. -->
+Additionally, we will create some move and monitor vectors.
 ```
-    mvi = 1
-    mni = 1
+moves = VectorMoves()
+monitors = VectorMonitors()
 ```
 
 
@@ -196,8 +197,8 @@ define and specify a prior on the exchangeability rates of the GTR model
 ```
 and assign its moves
 ```
-    moves[mvi++] = mvBetaSimplex(er, alpha=10, tune=true, weight=3) 
-    moves[mvi++] = mvDirichletSimplex(er, alpha=10.0, tune=true, weight=1.0)
+    moves.append( mvBetaSimplex(er, alpha=10, tune=true, weight=3) )
+    moves.append( mvDirichletSimplex(er, alpha=10.0, tune=true, weight=1.0) )
 ```
 We can use the same type of distribution as a prior on the 4 stationary
 frequencies ($\pi_A, \pi_C, \pi_G, \pi_T$) since these parameters also
@@ -210,8 +211,8 @@ base frequencies:
 Now add the simplex scale move on the stationary frequencies to the
 moves vector
 ```
-    moves[mvi++] = mvBetaSimplex(pi, alpha=10, tune=true, weight=2) 
-    moves[mvi++] = mvDirichletSimplex(pi, alpha=10.0, tune=true, weight=1.0)
+    moves.append( mvBetaSimplex(pi, alpha=10, tune=true, weight=2) )
+    moves.append( mvDirichletSimplex(pi, alpha=10.0, tune=true, weight=1.0) )
 ```
 We can finish setting up this part of the model by creating a
 deterministic node for the GTR rate matrix ‘Q‘. The ‘fnGTR()‘ function
@@ -256,7 +257,7 @@ RealPos‘). We will apply a simple scale move to this parameter. The
 scale move’s tuning parameter is called ‘lambda‘ and this value dictates
 the size of the proposal.
 ```
-    moves[mvi++] = mvScale(alpha, lambda=0.1, tune=false, weight=4.0)
+    moves.append( mvScale(alpha, lambda=0.1, tune=false, weight=4.0) )
 ```
 
 
@@ -269,8 +270,8 @@ probability of having substitution rate equal to zero. Here, we give the
 probability of a site being invariant with ‘pinvar‘
 ```
     pinvar ~ dnBeta(1,1)
-    moves[mvi++] = mvScale(pinvar, lambda=0.1, tune=false, weight=2.0)
-    moves[mvi++] = mvSlide(pinvar, delta=10.0, tune=false, weight=2.0)
+    moves.append( mvScale(pinvar, lambda=0.1, tune=false, weight=2.0) )
+    moves.append( mvSlide(pinvar, delta=10.0, tune=false, weight=2.0) )
 ```
 
 
@@ -300,8 +301,8 @@ interchange move (‘mvNNI‘) and a subtree-prune and regrafting move
 them, thus you only need to pass in the ‘topology‘ node and proposal
 ‘weight‘.
 ```
-    moves[mvi++] = mvNNI(topology, weight=1.0)
-    moves[mvi++] = mvSPR(topology, weight=1.0)
+    moves.append( mvNNI(topology, weight=1.0) )
+    moves.append( mvSPR(topology, weight=1.0) )
 ```
 The weight specifies how often the move will be applied either on
 average per iteration or relative to all other moves. Have a look at the
@@ -317,7 +318,7 @@ block of ‘Rev‘ code into the console:
 ```
     for (i in 1:num_branches) {
        br_lens[i] ~ dnExponential(10.0)
-       moves[mvi++] = mvScale(br_lens[i]) 
+       moves.append( mvScale(br_lens[i]) )
     }
 ```
 It is convenient for monitoring purposes to add the tree length as
@@ -367,18 +368,18 @@ we will initialize the model monitor using the ‘mnModel‘ function. This
 creates a new monitor variable that will output the states for all model
 parameters when passed into a MCMC function.
 ```
-    monitors[mni++] = mnModel(filename="output/PS_uniform.log",printgen=10)
+    monitors.append( mnModel(filename="output/PS_uniform.log",printgen=10) )
 ```
 The ‘mnFile‘ monitor will record the states for only the parameters
 passed in as arguments. We use this monitor to specify the output for
 our sampled trees and branch lengths.
 ```
-    monitors[mni++] = mnFile(psi, filename="output/PS_uniform.trees", printgen=10)
+    monitors.append( mnFile(psi, filename="output/PS_uniform.trees", printgen=10) )
 ```
 Finally, create a screen monitor that will report the states of
 specified variables to the screen with ‘mnScreen‘:
 ```
-    monitors[mni++] = mnScreen(alpha, pinvar, TL, printgen=1000)
+    monitors.append( mnScreen(alpha, pinvar, TL, printgen=1000) )
 ```
 
 
@@ -461,8 +462,8 @@ matching tip names.
     num_species <- data[1].ntaxa()
     num_branches <- 2 * num_species - 3
 
-    mvi = 1 
-    mni = 1
+    moves = VectorMoves()
+    monitors = VectorMonitors()
 ```
 
 
@@ -489,7 +490,7 @@ creating exchangeability rates
     for (i in 1:n_data_subsets) {
       er_prior[i] <- v(1,1,1,1,1,1)
       er[i] ~ dnDirichlet(er_prior[i])
-      moves[mvi++] = mvBetaSimplex(er[i], alpha=10, tune=true, weight=3) 
+      moves.append( mvBetaSimplex(er[i], alpha=10, tune=true, weight=3) )
     }
 ```
 and stationary frequencies
@@ -497,7 +498,7 @@ and stationary frequencies
     for (i in 1:n_data_subsets) {
       pi_prior[i] <- v(1,1,1,1)
       pi[i] ~ dnDirichlet(pi_prior[i])
-      moves[mvi++] = mvBetaSimplex(pi[i], alpha=10, tune=true, weight=2)
+      moves.append( mvBetaSimplex(pi[i], alpha=10, tune=true, weight=2) )
     }
 ```
 then passing those parameters into a rate matrix function
@@ -516,23 +517,23 @@ parameters: the $+\Gamma$ mixture model
         alpha[i] ~ dnUniform( 0.0, 1E8 )
         gamma_rates[i] := fnDiscretizeGamma( alpha[i], alpha[i], 4, false )
 
-        moves[mvi++] = mvScale(alpha[i],weight=2)
+        moves.append( mvScale(alpha[i],weight=2) )
     }
 ```
 the $+I$ invariant sites model
 ```
     for (i in 1:n_data_subsets) {
       pinvar[i] ~ dnBeta(1,1)
-      moves[mvi++] = mvScale(pinvar[i], lambda=0.1, tune=true, weight=2.0)
-      moves[mvi++] = mvSlide(pinvar[i], delta=0.1, tune=true, weight=2.0)
+      moves.append( mvScale(pinvar[i], lambda=0.1, tune=true, weight=2.0) )
+      moves.append( mvSlide(pinvar[i], delta=0.1, tune=true, weight=2.0) )
     }
 ```
 and the per-partition substitution rate multipliers
 ```
     # specify a rate multiplier for each partition
     part_rate_mult ~ dnDirichlet( rep(1.0, n_data_subsets) )
-    moves[mvi++] = mvBetaSimplex(part_rate_mult, alpha=1.0, tune=true, weight=n_data_subsets)
-    moves[mvi++] = mvDirichletSimplex(part_rate_mult, alpha=1.0, tune=true, weight=2.0)
+    moves.append( mvBetaSimplex(part_rate_mult, alpha=1.0, tune=true, weight=n_data_subsets) )
+    moves.append( mvDirichletSimplex(part_rate_mult, alpha=1.0, tune=true, weight=2.0) )
 
     # note that we use here a vector multiplication, 
     # i.e., multiplying each element of part_rate_mult by n_data_subsets
@@ -566,14 +567,14 @@ Second, we specify the HKY substitution model for the COX-II gene:
     pi ~ dnDirichlet(pi_prior)
 
     # specify a move to propose updates to on pi
-    moves[mvi++] = mvBetaSimplex(pi, weight=2)
-    moves[mvi++] = mvDirichletSimplex(pi, weight=1)
+    moves.append( mvBetaSimplex(pi, weight=2) )
+    moves.append( mvDirichletSimplex(pi, weight=1) )
 
     # specify a lognormal distribution as the prior distribution on kappa
     kappa ~ dnLognormal(0.0,1.25)
 
     # a simple scaling move to update kappa
-    moves[mvi++] = mvScale(kappa)
+    moves.append( mvScale(kappa)
 
     # Finally, create the HKY rate matrix
     Q[2] := fnHKY(kappa,pi)
@@ -604,13 +605,13 @@ was specified for mcmc_Partition_uniform.Rev.
     out_group = clade("Galeopterus_variegatus")
     # Prior distribution on the tree topology	
     topology ~ dnUniformTopology(taxa, outgroup=out_group)
-    moves[mvi++] = mvNNI(topology, weight=5.0)
-    moves[mvi++] = mvSPR(topology, weight=1.0)
+    moves.append( mvNNI(topology, weight=5.0) )
+    moves.append( mvSPR(topology, weight=1.0) )
 
     # Branch length prior
     for (i in 1:n_branches) {
         bl[i] ~ dnExponential(10.0)
-    	moves[mvi++] = mvScale(bl[i])
+    	 moves.append( mvScale(bl[i]) )
     }
 
     TL := sum(bl)
@@ -643,9 +644,9 @@ model object
 
 create the monitors
 ```
-    monitors[mni++] = mnModel(filename="output/PS_gene.log",printgen=10)
-    monitors[mni++] = mnFile(psi, filename="output/PS_gene.trees", printgen=100)
-    monitors[mni++] = mnScreen(TL, printgen=1000)
+    monitors.append( mnModel(filename="output/PS_gene.log",printgen=10) )
+    monitors.append( mnFile(psi, filename="output/PS_gene.trees", printgen=100) )
+    monitors.append( mnScreen(TL, printgen=1000) )
 ```
 configure and run the MCMC analysis
 ```
