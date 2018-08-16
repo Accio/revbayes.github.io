@@ -120,15 +120,15 @@ mymodel = model(phylogeny)
 
 # Create the MCMC monitors:
 # First, a screen monitor with some useful variables:
-monitors[1] = mnScreen(printgen=10)
+monitors.append(mnScreen(printgen=10))
 
 # The ancestral state monitor for sampling ancestral states.
 # Note that here we specify 'withStartState=true' so that we sample the states both at
 # start and end of each branch which allows us to reconstruct cladogenetic events.
-monitors[2] = mnJointConditionalAncestralState(filename="output/ChromEvol_clado_anc_states.log", printgen=10, tree=phylogeny, ctmc=chromo_ctmc, withStartStates=true, type="NaturalNumbers")
+monitors.append(mnJointConditionalAncestralState(filename="output/ChromEvol_clado_anc_states.log", printgen=10, tree=phylogeny, ctmc=chromo_ctmc, withStartStates=true, type="NaturalNumbers"))
 
 # And another monitor for all the model variables:
-monitors[3] = mnModel(filename="output/ChromEvol_clado_model.log", printgen=10)
+monitors.append(mnModel(filename="output/ChromEvol_clado_model.log", printgen=10))
 
 # Now set up the MCMC.
 mymcmc = mcmc(mymodel, monitors, moves)

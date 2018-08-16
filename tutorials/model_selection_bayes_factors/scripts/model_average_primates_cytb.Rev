@@ -115,9 +115,9 @@ my_model = model(phylogeny)
 # Make the monitors #
 #####################
 
-monitors[1] = mnModel(filename="output/" + name + "/posterior_samples.log",printgen=10, separator = TAB)
-monitors[2] = mnFile(filename="output/" + name + "/tree_samples.trees",printgen=10, separator = TAB, phylogeny)
-monitors[3] = mnScreen(printgen=1000, model_indicator, alpha_indicator)
+monitors.append(mnModel(filename="output/" + name + "/posterior_samples.log",printgen=10, separator = TAB))
+monitors.append(mnFile(filename="output/" + name + "/tree_samples.trees",printgen=10, separator = TAB, phylogeny))
+monitors.append(mnScreen(printgen=1000, model_indicator, alpha_indicator))
 
 ################
 # Run the MCMC #

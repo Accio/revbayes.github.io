@@ -65,11 +65,7 @@ tree <- readTrees(tree_fn)[1]
 
 log10_rate_bg ~ dnUniform(-4,2)
 log10_rate_bg.setValue(-2)
-<<<<<<< HEAD
-=======
-
 moves = VectorMoves()
->>>>>>> 4dcbb0d25ca69d46678a26d9d644522ac72ded3d
 moves.append(mvSlide(log10_rate_bg, weight=4))
 
 # Then, convert the rate from log-scale to linear-scale with a deterministic node, and assign moves.
