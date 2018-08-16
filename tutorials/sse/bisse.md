@@ -104,11 +104,13 @@ species `num_taxa` from the tree:
 
     num_taxa <- T.ntips()
 
-Our vectors of moves and monitors will be defined later, but here we
-initialize iterator variables for them:
+<!-- Our vectors of moves and monitors will be defined later, but here we
+initialize iterator variables for them: -->
+Our moves and monitors will be defined later, but here we
+initialize the vectors for them:
 
-    mvi = 1
-    mni = 1
+    moves = VectorMoves()
+    monitors = VectorMonitors()
 
 Finally, create a helper variable that specifies the number of states
 that the observed character has:
@@ -152,10 +154,10 @@ character state.
     for (i in 1:NUM_STATES) {
         
         speciation[i] ~ dnExponential( 1.0 / rate_mean )
-        moves[mvi++] = mvSlide(speciation[i], weight=3.0)
+        moves.append( mvSlide(speciation[i], weight=3.0) )
 
         extinction[i] ~ dnExponential( 1.0 / rate_mean )
-        moves[mvi++] = mvSlide(extinction[i], weight=3.0)
+        moves.append( mvSlide(extinction[i], weight=3.0) )
 
         diversification[i] := speciation[i] - extinction[i]
 
@@ -195,8 +197,8 @@ and `rate_21` is the rate of going from nocturnal to diurnal.
 
 For both transition rate variables specify a scaling move.
 
-    moves[mvi++] = mvScale( rate_12, weight=2 )
-    moves[mvi++] = mvScale( rate_21, weight=2 )
+    moves.append( mvScale( rate_12, weight=2 ) )
+    moves.append( mvScale( rate_21, weight=2 ) )
 
 Finally, we put the rates into a matrix, because this is what's needed
 by the function for the state-dependent birth-death process.
@@ -225,7 +227,7 @@ using a character with more than two states.
 
 We will use a special move for objects that are drawn from a Dirichlet distribution:
 
-    moves[mvi++] = mvDirichletSimplex(root_state_freq, weight=2)
+    moves.append( mvDirichletSimplex(root_state_freq, weight=2) )
 
 #### **The Probability of Sampling an Extant Species**
 
@@ -301,12 +303,12 @@ states of our Markov chain. The first monitor will model all numerical
 variables; we are particularly interested in the rates of speciation,
 extinction, and transition.
 
-    monitors[mni++] = mnModel(filename="output/primates_activTime_BiSSE_mcmc.log", printgen=10)
+    monitors.append( mnModel(filename="output/primates_activTime_BiSSE_mcmc.log", printgen=10) )
 
 Then, we add a screen monitor showing some updates during the MCMC
 run.
 
-    monitors[mni++] = mnScreen(printgen=10, rate_12, rate_21, speciation, extinction)
+    monitors.append( mnScreen(printgen=10, rate_12, rate_21, speciation, extinction) )
 
 {% aside Sampling Ancestral States %}
 
@@ -314,7 +316,7 @@ Optionally, we can sample ancestral states during the MCMC analysis.
 We need to add an additional monitor to record the state of each internal node in the tree.
 The file produced by this monitor can be summarized so that we can visualize the estimates of ancestral states.
 
-    monitors[mni++] = mnJointConditionalAncestralState(tree=timetree, cdbdp=timetree, type="Standard", printgen=10, withTips=true, withStartStates=false, filename="output/anc_states_primates_BiSSE.log")
+    monitors.append( mnJointConditionalAncestralState(tree=timetree, cdbdp=timetree, type="Standard", printgen=10, withTips=true, withStartStates=false, filename="output/anc_states_primates_BiSSE.log") )
 
 {% endaside %}
 
