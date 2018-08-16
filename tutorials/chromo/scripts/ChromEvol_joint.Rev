@@ -181,16 +181,16 @@ mymodel = model(phylogeny)
 
 # Create the monitors:
 # First, a screen monitor:
-monitors[1] = mnScreen(printgen=10)
+monitors.append(mnScreen(printgen=10))
 
 # A file monitor for our trees:
-monitors[2] = mnFile(filename="output/ChromEvol_joint.trees", printgen=10, phylogeny)
+monitors.append(mnFile(filename="output/ChromEvol_joint.trees", printgen=10, phylogeny))
 
 # The ancestral state monitor for sampling ancestral states:
-monitors[3] = mnJointConditionalAncestralState(filename="output/ChromEvol_joint_states.log", printgen=10, tree=phylogeny, ctmc=chromo_ctmc, type="NaturalNumbers")
+monitors.append(mnJointConditionalAncestralState(filename="output/ChromEvol_joint_states.log", printgen=10, tree=phylogeny, ctmc=chromo_ctmc, type="NaturalNumbers"))
 
 # And another monitor for all the model variables:
-monitors[4] = mnModel(filename="output/ChromEvol_joint_model.log", printgen=10)
+monitors.append(mnModel(filename="output/ChromEvol_joint_model.log", printgen=10))
 
 # Now set up the MCMC.
 mymcmc = mcmc(mymodel, monitors, moves)

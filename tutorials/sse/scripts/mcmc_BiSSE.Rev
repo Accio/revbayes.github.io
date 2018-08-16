@@ -26,8 +26,8 @@ data <- readCharacterData("data/primates_"+DATASET+".nex")
 taxa <- observed_phylogeny.taxa()
 
 # set my move index
-mvi = 0
-mni = 0
+moves = VectorMoves()
+monitors = VectorMonitors()
 
 
 H = 0.587405
@@ -51,27 +51,27 @@ for (i in 1:NUM_STATES) {
     log_speciation[i] ~ dnNormal(mean=rate_mean,sd=rate_sd) 
 #    log_speciation[i].setValue( rate_mean )
     speciation[i] := exp( log_speciation[i] )
-    moves[++mvi] = mvSlide(log_speciation[i],delta=0.20,tune=true,weight=3.0)
+    moves.append(mvSlide(log_speciation[i],delta=0.20,tune=true,weight=3.0))
 
     ### Create a lognormal distributed variable for the turnover rate
     log_extinction[i] ~ dnNormal(mean=rate_mean,sd=rate_sd) 
 #    log_extinction[i].setValue( rate_mean/2 )
     extinction[i] := exp( log_extinction[i] )
-    moves[++mvi] = mvSlide(log_extinction[i],delta=0.20,tune=true,weight=3.0)
+    moves.append(mvSlide(log_extinction[i],delta=0.20,tune=true,weight=3.0))
     
     
     ### diversification = birth_rate - death_rate
     ### assume a lognormal prior distribution 
     ### and apply a scale proposal
 #    diversification[i] ~ dnLognormal(rate_mean,sd=rate_sd) 
-#    moves[++mvi] = mvScale(diversification[i],lambda=1.0,tune=true,weight=3.0)
+#    moves.append(mvScale(diversification[i],lambda=1.0,tune=true,weight=3.0))
 
     ### turnover = death_rate / birth_rate
     ### this parameter can only take values between 0 and 1
     ### use a Beta prior distribution
     ### and a slide move
 #    turnover[i] ~ dnBeta(2.0, 2.0) 
-#    moves[++mvi] = mvSlide(turnover[i],delta=1.0,tune=true,weight=3.0)
+#    moves.append(mvSlide(turnover[i],delta=1.0,tune=true,weight=3.0))
 
     ### the parameters of the BDP include birth and death rates
     ### these are deterministic variables of the diversification & turnover
@@ -94,8 +94,8 @@ rate_pr := observed_phylogeny.treeLength() / 10
 rate_12 ~ dnExp(rate_pr)
 rate_21 ~ dnExp(rate_pr)
 
-moves[++mvi] = mvScale( rate_12, weight=2 )
-moves[++mvi] = mvScale( rate_21, weight=2 )
+moves.append(mvScale( rate_12, weight=2 ))
+moves.append(mvScale( rate_21, weight=2 ))
 
 
 
@@ -111,7 +111,7 @@ rate_matrix := fnFreeBinary( [rate_12, rate_21 ], rescaled=false)
 
 ### Create a constant variable with the prior probabilities of each rate category at the root.
 rate_category_prior ~ dnDirichlet( rep(1,NUM_STATES) )
-moves[++mvi] = mvDirichletSimplex(rate_category_prior,tune=true,weight=2)
+moves.append(mvDirichletSimplex(rate_category_prior,tune=true,weight=2))
 
 
 ### Create the fix parameter for the age of the root set to the observed age
@@ -148,10 +148,10 @@ timetree.clampCharData( data )
 mymodel = model(rate_matrix)
 
 ### set up the monitors that will output parameter values to file and screen 
-monitors[++mni] = mnFile(filename="output/primates_BiSSE_"+DATASET+".trees", printgen=1, timetree)
-monitors[++mni] = mnModel(filename="output/primates_BiSSE_"+DATASET+".log", printgen=1)
-monitors[++mni] = mnJointConditionalAncestralState(tree=timetree, cdbdp=timetree, type="Standard", printgen=1, withTips=true, withStartStates=false, filename="output/anc_states_primates_BiSSE_"+DATASET+".log")
-monitors[++mni] = mnScreen(printgen=10, rate_12, rate_21, speciation, extinction)
+monitors.append(mnFile(filename="output/primates_BiSSE_"+DATASET+".trees", printgen=1, timetree))
+monitors.append(mnModel(filename="output/primates_BiSSE_"+DATASET+".log", printgen=1))
+monitors.append(mnJointConditionalAncestralState(tree=timetree, cdbdp=timetree, type="Standard", printgen=1, withTips=true, withStartStates=false, filename="output/anc_states_primates_BiSSE_"+DATASET+".log"))
+monitors.append(mnScreen(printgen=10, rate_12, rate_21, speciation, extinction))
 
 
 ################

@@ -65,7 +65,6 @@ tree <- readTrees(tree_fn)[1]
 
 log10_rate_bg ~ dnUniform(-4,2)
 log10_rate_bg.setValue(-2)
-
 moves = VectorMoves()
 moves.append(mvSlide(log10_rate_bg, weight=4))
 
