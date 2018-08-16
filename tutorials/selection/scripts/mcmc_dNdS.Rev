@@ -21,7 +21,7 @@ taxa <- data.taxa()
 
 num_data_subsets = data.size()
 
-# set my move index
+# creates a vector for moves and monitors
 moves = VectorMoves()
 monitors = VectorMonitors()
 

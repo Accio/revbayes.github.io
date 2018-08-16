@@ -78,7 +78,7 @@ clade_constraints = [clade_ingroup, clade_outgroup]
 # We specify a uniform prior on the tree topology.
 topology ~ dnUniformTopology(taxa=taxa, constraints=clade_constraints, rooted=TRUE)
 
-# Initialize an index for our moves, and add moves on the topology.
+# Initialize a vector for our moves, and add moves on the topology.
 moves = VectorMoves()
 moves.append( mvNNI(topology, weight=10.0) )
 

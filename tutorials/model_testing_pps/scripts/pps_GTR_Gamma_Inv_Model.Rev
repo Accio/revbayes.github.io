@@ -19,7 +19,7 @@ n_sites <- data.nchar()
 names <- data.names()
 n_branches <- 2 * n_species - 3
 
-# set my move index
+# create a vector for moves
 moves = VectorMoves()
 
 

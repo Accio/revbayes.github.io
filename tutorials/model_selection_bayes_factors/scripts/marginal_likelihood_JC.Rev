@@ -23,7 +23,7 @@ n_branches <- 2 * n_species - 3
 taxa <- data.taxa()
 
 
-# set my move index
+# set my move vector
 moves = VectorMoves()
 monitors = VectorMonitors()
 

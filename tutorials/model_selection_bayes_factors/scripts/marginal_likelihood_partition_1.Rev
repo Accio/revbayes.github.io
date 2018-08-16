@@ -11,7 +11,7 @@ taxa = data_ITS.taxa()
 num_taxa = data_ITS.ntaxa()
 num_branches = 2 * num_taxa - 3
 
-# make a move index variable
+# make a vector for moves
 moves = VectorMoves()
 
 # name the analysis

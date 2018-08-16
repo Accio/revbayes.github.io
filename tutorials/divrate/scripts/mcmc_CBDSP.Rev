@@ -20,7 +20,7 @@ taxa <- observed_phylogeny.taxa()
 root <- observed_phylogeny.rootAge()
 tree_length <- observed_phylogeny.treeLength()
 
-# set my move index
+# set my move vector
 moves = VectorMoves()
 monitors = VectorMonitors()
 

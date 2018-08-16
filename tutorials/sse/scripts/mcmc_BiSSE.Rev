@@ -25,7 +25,7 @@ data <- readCharacterData("data/primates_"+DATASET+".nex")
 # Get some useful variables from the data. We need these later on.
 taxa <- observed_phylogeny.taxa()
 
-# set my move index
+# create a vector for moves and monitors
 moves = VectorMoves()
 monitors = VectorMonitors()
 
