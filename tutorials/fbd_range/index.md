@@ -290,8 +290,8 @@ First, create a vector called `monitors` that will contain all of the monitors.
 
 Next, create monitors for the FBDR model parameters speciation, extinction and fossil recovery, along with diversification and turnover.
 
-    moves.append( mnScreen(lambda, mu, psi, div, turnover, printgen=100) )
-    moves.append( mnModel(filename="model1.log", printgen=10) )
+    monitors.append( mnScreen(lambda, mu, psi, div, turnover, printgen=100) )
+    monitors.append( mnModel(filename="model1.log", printgen=10) )
 
 The `mnScreen` monitor writes the parameters we specify to the screen every 100 MCMC generations.
 The `mnFile` monitor writes the parameters we specify to file every 10 MCMC generations.     

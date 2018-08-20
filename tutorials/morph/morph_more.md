@@ -601,14 +601,24 @@ morpho <- readDiscreteCharacterData("data/mammals_thinned_placenta_type.nex")
 {% subsubsection Create Helper Variables | subsubsec_mvi_var %}
 
 Before we begin writing the Rev scripts for each of the model components, we need to instantiate a couple ``helper variables'' that will be used by downstream parts of our model specification files. 
-Create a workspace variable called `mvi`. 
+
+<!-- Create a workspace variable called `mvi`. 
 This variable is an iterator that will build a vector containing all of the MCMC moves used to propose new states for every stochastic node in the model graph. 
 Each time a new move is added to the vector, `mvi` will be incremented by a value of `1`.
 ```
 mvi = 1
 ```
 One important distinction here is that `mvi` is part of the RevBayes workspace and not the hierarchical model. 
-Thus, we use the workspace assignment operator `=` instead of the constant node assignment `<-`. 
+Thus, we use the workspace assignment operator `=` instead of the constant node assignment `<-`. -->
+
+Create a workspace variable called `moves`. 
+This is a vector that will contain all of the MCMC moves used to propose new states for every stochastic node in the model graph. 
+Each time a new move is added to the vector, the vector length will be incremented by a value of `1`.
+```
+moves = VectorMoves()
+```
+One important distinction here is that `move` is part of the RevBayes workspace and not the hierarchical model. 
+Thus, we use the workspace assignment operator `=` instead of the constant node assignment `<-`.
 
 
 
@@ -667,9 +677,10 @@ The object `mymodel` is a wrapper around the entire model graph and allows us to
 The next important step for our Rev script file is to specify the monitors and output file names.
 For this, we create a vector called `monitors` that will each sample and record or output our MCMC. 
 
-First, we will specify a workspace variable to iterate over the `monitors` vector.
+<!-- First, we will specify a workspace variable to iterate over the `monitors` vector.-->
+First, we will create a workspace variable, the `monitors` vector.
 ```
-mni = 1
+monitors = VectorMonitors()
 ```
 
 The first monitor we will create will monitor every named random variable in our model graph. 
@@ -678,24 +689,24 @@ In this case, it will only be our rate variable $\mu$.
 It is still useful to specify the model monitor this way for later extensions of the model.
 We will also name the output file for this monitor and indicate that we wish to sample our MCMC every 10 cycles.
 ```
-monitors[mni++] = mnModel(filename="output/mk.log", printgen=10)
+monitors.append( mnModel(filename="output/mk.log", printgen=10) )
 ```
 
 The second monitor we will add to our analysis will print information to the screen.
 Like with `mnFile` we must tell `mnScreen` which parameters we'd like to see updated on the screen. 
 ```
-monitors[mni++] = mnScreen(printgen=100)
+monitors.append( mnScreen(printgen=100) )
 ```
 
 The third and final monitor might be new to you: the `mnJointConditionalAncestralState` monitor computes and writes the ancestral states to file.
 ```
-monitors[mni++] = mnJointConditionalAncestralState(tree=phylogeny,
+monitors.append( mnJointConditionalAncestralState(tree=phylogeny,
                                                    ctmc=phyMorpho,
                                                    filename="output/mk.states.txt",
                                                    type="Standard",
                                                    printgen=1,
                                                    withTips=true,
-                                                   withStartStates=false)
+                                                   withStartStates=false) )
 ```
 
 The core arguments this monitor needs are a tree object (`tree=phylogeny`), 

@@ -227,9 +227,10 @@ moves    = VectorMoves()
 monitors = VectorMonitors()
 ```
 
-You may have noticed that we used the `=` operator to create the move index. 
+<!-- You may have noticed that we used the `=` operator to create the move index. -->
+You may have noticed that we used the `=` operator to create the `moves` vector.
 This simply means that the variable is not part of the model. 
-You will later see that we use this operator more often, e.g., when we create moves and monitors.
+<!-- You will later see that we use this operator more often, e.g., when we create moves and monitors.-->
 
 With the data loaded, we can now proceed to specify our specifying the model.
 

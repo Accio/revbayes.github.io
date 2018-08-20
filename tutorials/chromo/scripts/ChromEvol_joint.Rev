@@ -63,7 +63,6 @@ for (j in 1:taxa.size()) {
         i += 1
     }
 }
-mi = 0
 
 # And now we make the vector of clade objects to constrain our tree topology.
 clade_ingroup = clade(ingroup)

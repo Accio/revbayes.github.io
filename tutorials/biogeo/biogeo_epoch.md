@@ -99,9 +99,8 @@ in three files named `hawaii.n4.times.txt`,
     times_fn = geo_fn + ".times.txt"
     dist_fn = geo_fn + ".distances.txt"
 
-Create move vector (moves) and monitor vector
-(monitors) variables to populate the elements of our
-moves and monitors vectors, respectively.
+Create a vector `moves` and a vector
+`monitors`.
 
     moves    = VectorMoves()
     monitors = VectorMonitors()

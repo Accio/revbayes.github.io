@@ -297,10 +297,12 @@ Next, create two vectors called `moves` and `monitors`. These vectors will  cont
     moves    = VectorMoves()
     monitors = VectorMonitors()
 ```
-One important distinction here is that `mvi` is part of the RevBayes
+<!-- One important distinction here is that `mvi` is part of the RevBayes
+workspace and not the hierarchical model. Thus, we use the workspace
+assignment operator `=` instead of the constant node assignment `<-`.-->
+One important distinction here is that `moves` is part of the RevBayes
 workspace and not the hierarchical model. Thus, we use the workspace
 assignment operator `=` instead of the constant node assignment `<-`.
-
 
 {% subsection The Mk Model | subsec_Mk_model %}
 

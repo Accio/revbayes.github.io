@@ -260,8 +260,8 @@ Scripts are all placed in
         taxa <- primate_tree.taxa()
         n_branches <- 2 * n_species - 1 # number of branches in a rooted tree
 
-        # set my move index
-        mi = 0
+        # create a vector for moves
+        moves = VectorMoves()
 
 3.  We specify a constant-rate birth-death process as our prior on the
     species tree. The birth-death process has a speciation and

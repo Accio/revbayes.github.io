@@ -178,12 +178,15 @@ be created from the data matrix using the same methods.)
 ### Birth-Death Parameters
 
 We will begin by setting up the model parameters and proposal mechanisms
-of the birth-death model. Note that we have not initialized the
+of the birth-death model. 
+<!-- Note that we have not initialized the
 workspace iterator `mvi` yet. Because of this, if you typed these lines
 in the RevBayes console, you would get an error. Since this code is
 intended to be in a sourced `Rev` file, we are assuming that you would
 initialize `mvi` before calling
-`source("scripts/m_BDP_Tree_bears.Rev")`.
+`source("scripts/m_BDP_Tree_bears.Rev")`. -->
+
+Note that we have not initialized the vector `moves` yet. Because of this, if you typed these lines in the RevBayes console, you would get an error. Since this code is intended to be in a sourced `Rev` file, we are assuming that you would initialize `moves` before calling `source("scripts/m_BDP_Tree_bears.Rev")`.
 
 We will use the parameterization of the birth-death process specifying
 the diversification and turnover. For a more detailed tutorial on the

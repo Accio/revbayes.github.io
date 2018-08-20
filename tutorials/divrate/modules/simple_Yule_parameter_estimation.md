@@ -122,7 +122,7 @@ by a factor of 2.
 To estimate the value of $\lambda$, we assign a proposal mechanism to
 operate on this node. In RevBayes these MCMC sampling algorithms are
 called *moves*. We need to create a vector of moves and we can do this
-by using vector indexing and our pre-initialized iterator `mi`. We will
+using the `moves` vector defined above. We will
 use a scaling move on $\lambda$ called `mvScale`.
 ```
 moves.append( mvScale(birth_rate,lambda=1,tune=true,weight=3) )
